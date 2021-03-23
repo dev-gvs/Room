@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Животные</string>
+    <string name="text_view_default_text">Загрузка данных...</string>
+</resources>
