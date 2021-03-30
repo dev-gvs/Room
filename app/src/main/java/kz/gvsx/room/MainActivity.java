@@ -3,6 +3,9 @@ package kz.gvsx.room;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -19,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     // Строка, по которой форматируется отображение данных по животному из БД.
     private static final String ANIMAL_FORMAT = "%s\n├ Род: %s\n├ Семейство: %s\n├ Отряд: %s\n└ Класс: %s\n\n";
 
-    private AppDatabase db;
     private AnimalDao animalDao;
     private TextView textView;
 
@@ -28,10 +30,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        db = AppDatabase.getInstance(getApplicationContext());
+        AppDatabase db = AppDatabase.getInstance(getApplicationContext());
         animalDao = db.animalDao();
 
         textView = findViewById(R.id.textView);
+        EditText searchField = findViewById(R.id.editTextSearchField);
 
         // Проверяем заполнена ли БД, если нет, то добавляем строки.
         SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
@@ -43,9 +46,33 @@ public class MainActivity extends AppCompatActivity {
             editor.apply();
         }
 
+        searchField.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                loadAnimals(editable.toString());
+            }
+        });
+
+        loadAnimals("");
+    }
+
+    private void loadAnimals(String query) {
         // Запускаем отдельный поток, в котором получаем данные из БД.
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Animal> animals = animalDao.getAll();
+            List<Animal> animals;
+            if (query.isEmpty()) {
+                animals = animalDao.getAll();
+            } else {
+                animals = animalDao.search(query.toLowerCase());
+            }
             // Обновляем textView в основном потоке
             runOnUiThread(() -> textView.setText(formatList(animals)));
         });
