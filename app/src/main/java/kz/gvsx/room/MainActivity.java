@@ -1,7 +1,5 @@
 package kz.gvsx.room;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -35,16 +33,6 @@ public class MainActivity extends AppCompatActivity {
 
         textView = findViewById(R.id.textView);
         EditText searchField = findViewById(R.id.editTextSearchField);
-
-        // Проверяем заполнена ли БД, если нет, то добавляем строки.
-        SharedPreferences sharedPref = this.getPreferences(Context.MODE_PRIVATE);
-        boolean dbIsPopulated = sharedPref.getBoolean("db_is_populated", false);
-        if (!dbIsPopulated) {
-            populateDatabase();
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean("db_is_populated", true);
-            editor.apply();
-        }
 
         searchField.addTextChangedListener(new TextWatcher() {
             @Override
@@ -88,30 +76,5 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return result.toString();
-    }
-
-    private void populateDatabase() {
-        // Добавляем животных в отдельном потоке.
-        Executors.newSingleThreadExecutor().execute(() -> {
-                    animalDao.insert(new Animal(
-                            "Волк", "Волки", "Псовые",
-                            "Хищные", "Млекопитающие"));
-                    animalDao.insert(new Animal(
-                            "Медведь", "Медведи", "Медвежьи",
-                            "Хищные", "Млекопитающие"));
-                    animalDao.insert(new Animal(
-                            "Гигантская акула-молот", "Акулы-молоты", "Молотоголовые акулы",
-                            "Кархаринообразные", "Хрящевые рыбы"));
-                    animalDao.insert(new Animal(
-                            "Жираф", "Жирафы", "Жирафовые",
-                            "Китопарнокопытные", "Млекопитающие"));
-                    animalDao.insert(new Animal(
-                            "Жако", "Тупохвостые попугаи", "Попугаевые",
-                            "Попугаеобразные", "Птицы"));
-                    animalDao.insert(new Animal(
-                            "Олень Давида", "Олени Давида", "Оленевые",
-                            "Парнокопытные", "Млекопитающие"));
-                }
-        );
     }
 }

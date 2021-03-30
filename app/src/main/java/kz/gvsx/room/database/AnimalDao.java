@@ -19,5 +19,5 @@ public interface AnimalDao {
     List<Animal> search(String query);
 
     @Insert
-    void insert(Animal animal);
+    void insertAll(Animal... animals);
 }
